@@ -6,7 +6,13 @@ export async function userCheck(UUID) {
   const AppVersion = appConfig.expo.version;
   const URL = `${MAIN_URL}/MobileUserAndVersionCheck`;
   try {
-    const response = await axios.get(URL);
+    const response = await axios.get(URL, {
+      params: {
+        UUID,
+        AppName,
+        AppVersion,
+      },
+    });
     if (
       response.data &&
       Array.isArray(response.data) &&
@@ -23,7 +29,7 @@ export async function userCheck(UUID) {
     if (error.response) {
       // The request was made, and the server responded with a status code
       // that falls out of the range of 2xx
-      ErrMessage = `Error Response: ${error.response.data}`;
+      ErrMessage = `Error Response: ${JSON.stringify(error.response.data)}`;
       ErrMessage = ErrMessage + `Error Status: ${error.response.status}`;
       ErrMessage = ErrMessage + `Error Headers: ${error.response.headers}`;
     } else if (error.request) {

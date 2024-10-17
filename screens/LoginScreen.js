@@ -22,7 +22,7 @@ function LoginScreen() {
       }
       authCtx.authenticate(userData);
     } catch (error) {
-      Alert.alert("Authentication failed!", error);
+      Alert.alert("Authentication failed!", error.message);
       setIsAuthenticating(false);
     }
   }

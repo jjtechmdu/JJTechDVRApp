@@ -1,5 +1,12 @@
 import { useState, useContext } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import * as Network from "expo-network";
 import { useNavigation } from "@react-navigation/native";
 
@@ -89,25 +96,34 @@ function AuthContent({ isLogin, onAuthenticate }) {
   }
 
   return (
-    <View style={styles.authContent}>
-      <AuthForm
-        isLogin={isLogin}
-        onSubmit={submitHandler}
-        credentialsInvalid={credentialsInvalid}
-      />
-      <View style={styles.buttons}>
-        <FlatButton onPress={registerNewUserHandler}>
-          {isLogin ? "To register this mobile click here" : "Log in instead"}
-        </FlatButton>
-      </View>
-      <Text style={styles.footer}>J.J.Tech Mobile Application (DVR)</Text>
-    </View>
+    <ScrollView>
+      <KeyboardAvoidingView style={styles.screen} behavior="position">
+        <View style={styles.authContent}>
+          <AuthForm
+            isLogin={isLogin}
+            onSubmit={submitHandler}
+            credentialsInvalid={credentialsInvalid}
+          />
+          <View style={styles.buttons}>
+            <FlatButton onPress={registerNewUserHandler}>
+              {isLogin
+                ? "To register this mobile click here"
+                : "Log in instead"}
+            </FlatButton>
+          </View>
+          <Text style={styles.footer}>J.J.Tech Mobile Application (DVR)</Text>
+        </View>
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 
 export default AuthContent;
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   authContent: {
     marginTop: 64,
     marginHorizontal: 32,

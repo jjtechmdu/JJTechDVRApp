@@ -5,6 +5,7 @@ import { AuthContext } from "../../store/auth-context";
 import IconButton from "../../components/ui/IconButton";
 import WelcomeScreen from "../WelcomeScreen";
 import { Colors } from "../../constants/styles";
+import { useContext } from "react";
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
