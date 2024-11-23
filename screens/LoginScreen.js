@@ -4,6 +4,7 @@ import LoadingOverlay from "../components/ui/LoadingOverlay";
 import { login } from "../util/sqlite/userDetailSqliteDB";
 import { Alert } from "react-native";
 import { AuthContext } from "../store/auth-context";
+import { getLastPulledOn } from "../util/sqlite/serverDatatoSqliteDB";
 
 function LoginScreen() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -21,6 +22,8 @@ function LoginScreen() {
         return;
       }
       authCtx.authenticate(userData);
+      const LastPulledDate = await getLastPulledOn();
+      authCtx.saveLastPulledOn(LastPulledDate);
     } catch (error) {
       Alert.alert("Authentication failed!", error.message);
       setIsAuthenticating(false);

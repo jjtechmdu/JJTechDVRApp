@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import AuthContextProvider, { AuthContext } from "./store/auth-context";
-import { StyleSheet, View, Text, Alert } from "react-native";
+import { StyleSheet, View, Alert } from "react-native";
 import * as Application from "expo-application";
 
 import { init } from "./util/sqlite/userDetailSqliteDB";
@@ -46,7 +46,6 @@ function Root() {
       }
       setAppIsReady(true);
     }
-
     fetchInitialDb();
   }, []);
   const onLayoutRootView = useCallback(async () => {

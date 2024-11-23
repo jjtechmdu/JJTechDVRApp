@@ -5,6 +5,7 @@ import appConfig from "../../app.json";
 export async function userCheck(UUID) {
   const AppVersion = appConfig.expo.version;
   const URL = `${MAIN_URL}/MobileUserAndVersionCheck`;
+
   try {
     const response = await axios.get(URL, {
       params: {
@@ -12,6 +13,7 @@ export async function userCheck(UUID) {
         AppName,
         AppVersion,
       },
+      timeout: 30000,
     });
     if (
       response.data &&
@@ -19,26 +21,34 @@ export async function userCheck(UUID) {
       response.data.length > 0
     ) {
       const [userData] = response.data;
-      // console.log(userData);
       return userData;
     } else {
       throw new Error("Unexpected response format or empty data");
     }
   } catch (error) {
     let ErrMessage;
+
     if (error.response) {
-      // The request was made, and the server responded with a status code
-      // that falls out of the range of 2xx
-      ErrMessage = `Error Response: ${JSON.stringify(error.response.data)}`;
-      ErrMessage = ErrMessage + `Error Status: ${error.response.status}`;
-      ErrMessage = ErrMessage + `Error Headers: ${error.response.headers}`;
+      // Server responded with a status code outside the 2xx range
+      ErrMessage = `Error Response: Status ${
+        error.response.status
+      }, Data: ${JSON.stringify(error.response.data)}`;
     } else if (error.request) {
-      // The request was made, but no response was received
-      ErrMessage = ErrMessage + `No Response:', ${error.request}`;
+      // Request made but no response received
+      if (error.message.includes("Network Error")) {
+        ErrMessage = "Network Error! ";
+      } else {
+        ErrMessage = `No Response Received: ${error.message}`;
+      }
     } else {
-      // Something happened in setting up the request that triggered an Error
-      ErrMessage = ErrMessage + `Axios Error:, ${error.message}`;
+      // Request setup error or unknown error
+      ErrMessage = `Axios Error: ${error.message}`;
     }
-    throw ErrMessage;
+
+    // Optionally, log the error object for debugging
+    console.error("Full Error Object:", error);
+
+    // Throw an Error object for better stack trace and debugging
+    throw new Error(ErrMessage);
   }
 }

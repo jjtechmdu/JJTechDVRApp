@@ -16,8 +16,10 @@ import { Colors } from "../../constants/styles";
 import { userCheck } from "../../util/database/auth";
 import { insertUserDataToSqlite } from "../../util/sqlite/userDetailSqliteDB";
 import { AuthContext } from "../../store/auth-context";
+import LoadingOverlay from "../ui/LoadingOverlay";
 
 function AuthContent({ isLogin, onAuthenticate }) {
+  const [regProgress, setRegProgress] = useState(false);
   const authCtx = useContext(AuthContext);
   const navigation = useNavigation();
   const [credentialsInvalid, setCredentialsInvalid] = useState({
@@ -28,29 +30,33 @@ function AuthContent({ isLogin, onAuthenticate }) {
 
   async function registerNewUserHandler() {
     try {
+      setRegProgress(true);
       let uniqueId = authCtx.uniqueId;
       const { isInternetReachable, type } =
         await Network.getNetworkStateAsync();
       if (!isInternetReachable) {
         Alert.alert("Network error", "Check Your Internet Connection...");
+        setRegProgress(false);
         return;
       }
       const userData = await userCheck(uniqueId);
-      Alert.alert("Message", JSON.stringify(userData));
+      //Alert.alert("Message", JSON.stringify(userData));
       if (userData.IsValidApp === "N") {
         Alert.alert(
           "Invalid Version",
           `This version is outdatad. Update latest version ${userData.AppCurVersion}`
         );
+        setRegProgress(false);
         return;
       }
       if (userData.IsValidUser === "N") {
         //  console.log(typeof userData.IsValidUser);
-        //uniqueId = uuidv4(); // Generate new UUID
+        // console.log(uniqueId);
         Alert.alert(
           "Register",
           `No user match for this mobile. Register with following ID ${uniqueId}`
         );
+        setRegProgress(false);
         return;
       }
       if (userData.IsValidUser === "M") {
@@ -59,13 +65,16 @@ function AuthContent({ isLogin, onAuthenticate }) {
           "Register",
           `Multiple users Registered with this mobile ID ${uniqueId}. Contact your admin`
         );
+        setRegProgress(false);
         return;
       }
       const result = await insertUserDataToSqlite(userData);
       Alert.alert("Success", result);
+      setRegProgress(false);
     } catch (error) {
       // console.warn(error);
       Alert.alert("Error", error.message || JSON.stringify(error));
+      setRegProgress(false);
     }
   }
 
@@ -93,6 +102,10 @@ function AuthContent({ isLogin, onAuthenticate }) {
       return;
     }
     onAuthenticate({ userName, password });
+  }
+
+  if (regProgress) {
+    return <LoadingOverlay message="Registration in progress..." />;
   }
 
   return (

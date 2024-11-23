@@ -1,41 +1,18 @@
-import * as SQLite from "expo-sqlite";
-import { sqliteDbName } from "../../constants/global";
+//import * as SQLite from "expo-sqlite";
+
+import { openDatabase, CreateTables } from "./initializeSqliteDB";
 
 let database;
-
-async function openDatabase() {
-  try {
-    if (!database) {
-      database = await SQLite.openDatabaseAsync(sqliteDbName);
-    }
-  } catch (error) {
-    console.warn(error);
-  }
-}
 
 // Function to initialize the database and create the table if it doesn't exist
 export async function init() {
   try {
-    // Open the database connection asynchronously
     if (!database) {
-      await openDatabase();
+      database = await openDatabase();
     }
     if (database) {
       // Set the journal mode to WAL and create the table
-      await database.execAsync(`
-        PRAGMA journal_mode = WAL;
-        CREATE TABLE IF NOT EXISTS userDetail (
-          id INTEGER PRIMARY KEY NOT NULL, 
-          UserName TEXT NOT NULL, 
-          UserNameOid TEXT NOT NULL, 
-          Pwd TEXT NOT NULL,
-          SupervisorName TEXT NOT NULL,
-          Accode TEXT NOT NULL,
-          BranchName TEXT NOT NULL,
-          BranchOid TEXT NOT NULL,
-          ImeiNo TEXT NOT NULL
-        );
-      `);
+      await CreateTables();
       const firstRow = await database.getFirstAsync("SELECT * FROM userDetail");
       return firstRow;
       //  console.log("Database initialized successfully.");
@@ -48,13 +25,20 @@ export async function init() {
   }
 }
 
+export async function deleteUserDataFromSqlite() {
+  if (!database) {
+    database = await openDatabase();
+  }
+  await database.runAsync("DELETE FROM userDetail");
+}
+
 export async function insertUserDataToSqlite(userDetail) {
   try {
     if (!database) {
-      await init();
+      database = await openDatabase();
     }
-    await database.runAsync("DELETE FROM userDetail");
 
+    await deleteUserDataFromSqlite();
     const result = await database.runAsync(
       `INSERT INTO userDetail (UserName,UserNameOid, Pwd, SupervisorName, Accode,BranchName,BranchOid,ImeiNo) VALUES (?,?,?,?,?,?,?,?)`,
       [
@@ -101,6 +85,36 @@ export async function login(userName, password) {
     //console.error(error);
     throw new Error(
       `Could not log you in. Due to ${error} this issue. Contact Your Admin !`
+    );
+  }
+}
+
+export async function validateUserData(userDetail) {
+  try {
+    if (!database) {
+      await openDatabase();
+    }
+    const firstRow = await database.getFirstAsync(
+      "SELECT * FROM userDetail WHERE userName = ? and UserNameOid=? and Pwd=? and SupervisorName=? and Accode=? and BranchOid=? and ImeiNo=?",
+      [
+        userDetail.UserName,
+        userDetail.UserNameOid,
+        userDetail.Pwd,
+        userDetail.SupervisorName,
+        userDetail.Accode,
+        userDetail.BranchOid,
+        userDetail.UUID,
+      ]
+    );
+    if (!firstRow) {
+      return null;
+    } else {
+      return true;
+    }
+  } catch (error) {
+    //console.error(error);
+    throw new Error(
+      `User data check failed. Due to ${error} this issue. Contact Your Admin !`
     );
   }
 }

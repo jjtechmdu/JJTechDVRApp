@@ -5,14 +5,17 @@ export const AuthContext = createContext({
   userData: "",
   isAuthenticated: false,
   uniqueId: "",
+  lastPulledOn: null,
   authenticate: (userData) => {},
   saveUniqueId: (uniqueId) => {},
+  saveLastPulledOn: (lastPulledOn) => {},
   logout: () => {},
 });
 
 function AuthContextProvider({ children }) {
   const [authUserData, setAuthUserData] = useState();
   const [authUniqueId, setAuthUniqueId] = useState();
+  const [lastPulledOn, setLastPulledOn] = useState();
 
   function authenticate(userData) {
     setAuthUserData(userData);
@@ -23,18 +26,24 @@ function AuthContextProvider({ children }) {
     setAuthUniqueId(uniqueId);
   }
 
+  function saveLastPulledOn(LastPulledDate) {
+    setLastPulledOn(LastPulledDate);
+  }
+
   function logout() {
     setAuthUserData(null);
-    setAuthUniqueId(null);
+    //  setAuthUniqueId(null);
     // AsyncStorage.removeItem("userData");
   }
 
   const value = {
     userData: authUserData,
     uniqueId: authUniqueId,
+    lastPulledOn: lastPulledOn,
     isAuthenticated: !!authUserData,
     authenticate: authenticate,
     saveUniqueId: saveUniqueId,
+    saveLastPulledOn: saveLastPulledOn,
     logout: logout,
   };
 

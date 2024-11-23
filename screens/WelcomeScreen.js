@@ -1,44 +1,38 @@
-import axios from "axios";
-import { useContext, useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useContext } from "react";
+import { FlatList } from "react-native";
 import { AuthContext } from "../store/auth-context";
+import { SCREENLIST } from "../constants/global";
+import ScreenGridTitle from "../components/ui/ScreenGridTiltle";
 
-function WelcomeScreen() {
-  const [fetchedMeassage, setFetchedMessage] = useState();
-  const authCtx = useContext(AuthContext);
-  const userData = authCtx.userData;
-  /*useEffect(() => {
-    axios
-      .get(
-        "https://react-native-course-fc21c-default-rtdb.firebaseio.com/message.json?auth=" +
-          token
-      )
-      .then((response) => {
-        setFetchedMessage(response.data);
-      })
-      .catch((error) => console.warn(error));
-  }, [token]);*/
+function WelcomeScreen({ navigation }) {
+  const autCtx = useContext(AuthContext);
+
+  function renderScreenItem(itemData) {
+    function pressHandler() {
+      const screenName = itemData.item.screenName || "WelcomeScreen";
+      navigation.navigate(screenName, {
+        screenId: itemData.item.id,
+      });
+    }
+
+    return (
+      <ScreenGridTitle
+        title={itemData.item.title}
+        color={itemData.item.color}
+        icon={itemData.item.icon}
+        onPress={pressHandler}
+      />
+    );
+  }
 
   return (
-    <View style={styles.rootContainer}>
-      <Text style={styles.title}>Welcome!</Text>
-      <Text>You authenticated successfully!</Text>
-    </View>
+    <FlatList
+      data={SCREENLIST}
+      keyExtractor={(item) => item.id}
+      renderItem={renderScreenItem}
+      numColumns={3}
+    />
   );
 }
 
 export default WelcomeScreen;
-
-const styles = StyleSheet.create({
-  rootContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 32,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-});
